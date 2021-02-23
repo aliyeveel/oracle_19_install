@@ -1,0 +1,50 @@
+package:
+  - bc    
+  - binutils
+  - compat-libcap1
+  - compat-libstdc++-33
+  - dtrace-modules
+  - dtrace-modules-headers
+  - dtrace-modules-provider-headers
+  - dtrace-utils
+  - elfutils-libelf
+  - elfutils-libelf-devel
+  - fontconfig-devel
+  - glibc
+  - glibc-devel
+  - ksh
+  - libaio
+  - libaio-devel
+  - libdtrace-ctf-devel
+  - libXrender
+  - libXrender-devel
+  - libX11
+  - libXau
+  - libXi
+  - libXtst
+  - libgcc
+  - librdmacm-devel
+  - libstdc++
+  - libstdc++-devel
+  - libxcb
+  - make
+  - net-tools 
+  - nfs-utils 
+  - python 
+  - python-configshell 
+  - python-rtslib 
+  - python-six 
+  - targetcli 
+  - smartmontools
+  - sysstat
+  - unixODBC
+  - xdpyinfo
+  - xhost
+group:
+  - name: oinstall
+    gid: 54321
+  - name: dba
+    gid: 54322 
+  - name: oper
+    gid: 54323
+
