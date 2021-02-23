@@ -21,85 +21,88 @@
        state: installed
      loop: "{{ package }}"
      when: yum_check.rc == 0
-   - name: sysctl and limits config
-     block: 
-       - name: copy sysctl conf
-         copy: 
-           dest: /etc/sysctl.d/98-oracle.conf
-           src: oracle_sysctl.conf
-       - name: oracle limit conf
-         copy:
-           dest: /etc/security/limits.d/oracle-database-server-12cR2-preinstall.conf
-           src: oracle_sysctl.conf
-   - name: group and user related task
+   - name: if  u01 is seperatly diffrent partitions 
      block:
-       - name: create groups
-         group:
-           name: "{{ item.name }}"
-           gid: "{{ item.gid }}"
-           state: present
-         loop: "{{ group }}"
-       - name: add oracle user
-         user:
-           name: oracle
-           group: oinstall
-           groups: dba,oper
-   - name: security related tasks
-     block:
-       - name: add port to firewalld
-         firewalld:
-           port: 1521/tcp
-           permanent: yes
-           immediate: yes
-           state: enabled
-       - name: set permissive selinux
-         lineinfile:
-           path: /etc/selinux/config
-           regexp: '^SELINUX='
-           line: SELINUX=permissive
-       - name: use setenforce
-         shell: setenforce 0
-   - name: tasks  must be run after add oracle user.
-     block:
-       - name: create dbhome
-         file: 
-           path: /u01/app/oracle/product/19.0.0/dbhome_1
-           recurse: yes
-           state: directory
-           group: oinstall
-           owner: oracle
-           mode: 0775
-       - name: create scripts folder
-         file:
-           path: /home/oracle/scripts
-           recurse: yes
-           state: directory
-           group: oinstall
-           owner: oracle
-           mode: 0775
-       - name:  copy *.sh to scripts folder
-         copy:
-           dest: /home/oracle/scripts
-           src: scripts/
-           owner: oracle
-           group: oinstall
-           mode: 0740
-       - name: copy oracle soft
-         copy:
-           dest: /u01/app/oracle/product/19.0.0/dbhome_1/
-           src: /zip_folder/LINUX.X64_193000_db_home.zip
-           owner: oracle
-           group: oinstall
-           mode: 0775
-       - name: unzip
-         shell:
-           cmd: |
-              cd  /u01/app/oracle/product/19.0.0/dbhome_1/
-              unzip LINUX.X64_193000_db_home.zip
-              chown -R oracle:oinstall /u01/app/oracle/product/19.0.0/dbhome_1/
-       - name: set env in bash profile
-         shell:  
-            cmd: |
-                 echo ". /home/oracle/scripts/setEnv.sh" >> /home/oracle/.bash_profile
-                 echo "{{ oracle_pass }}" | passwd --stdin oracle
+       - name: sysctl and limits config
+         block: 
+           - name: copy sysctl conf
+             copy: 
+               dest: /etc/sysctl.d/98-oracle.conf
+               src: oracle_sysctl.conf
+           - name: oracle limit conf
+             copy:
+               dest: /etc/security/limits.d/oracle-database-server-12cR2-preinstall.conf
+               src: oracle_sysctl.conf
+       - name: group and user related task
+         block:
+           - name: create groups
+             group:
+               name: "{{ item.name }}"
+               gid: "{{ item.gid }}"
+               state: present
+             loop: "{{ group }}"
+           - name: add oracle user
+             user:
+               name: oracle
+               group: oinstall
+               groups: dba,oper
+       - name: security related tasks
+         block:
+           - name: add port to firewalld
+             firewalld:
+               port: 1521/tcp
+               permanent: yes
+               immediate: yes
+               state: enabled
+           - name: set permissive selinux
+             lineinfile:
+               path: /etc/selinux/config
+               regexp: '^SELINUX='
+               line: SELINUX=permissive
+           - name: use setenforce
+             shell: setenforce 0
+       - name: tasks  must be run after add oracle user.
+         block:
+           - name: create dbhome
+             file: 
+               path: /u01/app/oracle/product/19.0.0/dbhome_1
+               recurse: yes
+               state: directory
+               group: oinstall
+               owner: oracle
+               mode: 0775
+           - name: create scripts folder
+             file:
+               path: /home/oracle/scripts
+               recurse: yes
+               state: directory
+               group: oinstall
+               owner: oracle
+               mode: 0775
+           - name:  copy *.sh to scripts folder
+             copy:
+               dest: /home/oracle/scripts
+               src: scripts/
+               owner: oracle
+               group: oinstall
+               mode: 0740
+           - name: copy oracle soft
+             copy:
+               dest: /u01/app/oracle/product/19.0.0/dbhome_1/
+               src: /zip_folder/LINUX.X64_193000_db_home.zip
+               owner: oracle
+               group: oinstall
+               mode: 0775
+           - name: unzip
+             shell:
+               cmd: |
+                  cd  /u01/app/oracle/product/19.0.0/dbhome_1/
+                  unzip LINUX.X64_193000_db_home.zip
+                  chown -R oracle:oinstall /u01/app/oracle/product/19.0.0/dbhome_1/
+           - name: set env in bash profile
+             shell:  
+                cmd: |
+                     echo ". /home/oracle/scripts/setEnv.sh" >> /home/oracle/.bash_profile
+                     echo "{{ oracle_pass }}" | passwd --stdin oracle
+     when: u01_check == 0
 ...
